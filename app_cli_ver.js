@@ -8,9 +8,12 @@ const View = require('./view');
 const Validator = require('./validator');
 const Model = require('./model');
 
+const blackStone = 1;
+const whiteStone = 2;
+
 const validator = new Validator();
 const view = new View();
-const model = new Model({ validator });
+const model = new Model({ blackStone, whiteStone, validator });
 
 const app = {
   start() {

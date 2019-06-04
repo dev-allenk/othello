@@ -1,18 +1,20 @@
 class Model {
-  constructor({ validator }) {
+  constructor({ blackStone, whiteStone, validator }) {
     this.state = Array(8).fill(null).map(() => Array(8).fill(0));
     this.validator = validator;
     this.turn = 'black';
+    this.blackStone = blackStone;
+    this.whiteStone = whiteStone;
   }
   init() {
-    this.state[3][4] = 1;
-    this.state[4][3] = 1;
-    this.state[3][3] = 2;
-    this.state[4][4] = 2;
+    this.state[3][4] = this.blackStone;
+    this.state[4][3] = this.blackStone;
+    this.state[3][3] = this.whiteStone;
+    this.state[4][4] = this.whiteStone;
   }
 
   changeTurn() {
-    if(this.turn === 'black') this.turn = 'white';
+    if (this.turn === 'black') this.turn = 'white';
     else this.turn = 'black';
   }
 
@@ -20,10 +22,10 @@ class Model {
     input = input.split(' ').map(el => Number(el));
     const row = input[0];
     const column = input[1];
-    
-    if(this.turn === 'black') this.state[row][column] = 1;
-    else this.state[row][column] = 2;
-    
+
+    if (this.turn === 'black') this.state[row][column] = this.blackStone;
+    else this.state[row][column] = this.whiteStone;
+
     this.changeTurn();
   }
 
