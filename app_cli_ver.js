@@ -14,11 +14,18 @@ const model = new Model({ validator });
 
 const app = {
   start() {
-    rl.setPrompt('입력하세요 : ');
-    rl.prompt();
-    rl.on('line', (input) => {
+    model.init();
+    view.showState(model.state);
 
+    rl.setPrompt(`${model.turn}의 턴입니다. : `);
+    rl.prompt();
+
+    rl.on('line', (input) => {
+      model.updateState(input);
       view.showState(model.state);
+
+      rl.setPrompt(`${model.turn}의 턴입니다. : `);
+      rl.prompt();
     })
     rl.on('close', () => {
       process.exit();
