@@ -23,6 +23,8 @@ class Model {
     const row = input[0];
     const column = input[1];
 
+    if (this.validator.isOccupied(this.state, row, column)) return;
+
     if (this.turn === 'black') this.state[row][column] = this.blackStone;
     else this.state[row][column] = this.whiteStone;
 
