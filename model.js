@@ -20,7 +20,8 @@ class Model {
   }
 
   parseInput(input) {
-    return [row, column] = input.split(' ').map(el => Number(el));
+    const [row, column] = input.split(' ').map(el => Number(el));
+    return [row, column];
   }
 
   setStone(state, turn, row, column) {
@@ -45,12 +46,12 @@ class Model {
   getAffectedLines(state, row, column) {
     const horizontalLine = state[row];
     const verticalLine = state.map(el => el[column]);
-    const descendingLine = getDescendingLine(state, row, column);
-    const ascendingLine = getAscendingLine(state, row, column);
+    const descendingLine = this.getDescendingLine(state, row, column);
+    const ascendingLine = this.getAscendingLine(state, row, column);
     return { horizontalLine, verticalLine, descendingLine, ascendingLine };
   }
 
-  getIndexL(line, rowOrColumn) {
+  getIndexR(line, rowOrColumn) {
     const indexes = [];
     const inputStoneColor = line[rowOrColumn];
     for (let i = 1; i < 8 - rowOrColumn; i++) {
@@ -61,7 +62,7 @@ class Model {
     }
   }
 
-  getIndexR(line, rowOrColumn) {
+  getIndexL(line, rowOrColumn) {
     const indexes = [];
     const inputStoneColor = line[rowOrColumn];
     for (let i = 1; i < rowOrColumn + 1; i++) {
@@ -109,31 +110,31 @@ class Model {
   }
 
   updateHorizontal(state, { horizontalLine, column }) {
-    const indexL = getIndexL(horizontalLine, column);
-    const indexR = getIndexR(horizontalLine, column);
-    const indexes = concatIdxs({ indexL, indexR });
-    reverseRow(indexes, horizontalLine);
+    const indexL = this.getIndexL(horizontalLine, column);
+    const indexR = this.getIndexR(horizontalLine, column);
+    const indexes = this.concatIdxs({ indexL, indexR });
+    this.reverseRow(indexes, horizontalLine);
   }
 
   updateVertical(state, { verticalLine, row, column }) {
-    const indexL = getIndexL(verticalLine, row);
-    const indexR = getIndexR(verticalLine, row);
-    const indexes = concatIdxs({ indexL, indexR });
-    reverseColumn({ indexes, state, column });
+    const indexL = this.getIndexL(verticalLine, row);
+    const indexR = this.getIndexR(verticalLine, row);
+    const indexes = this.concatIdxs({ indexL, indexR });
+    this.reverseColumn({ indexes, state, column });
   }
 
   updateDescending(state, { descendingLine, row, column }) {
-    const indexL = getIndexL(descendingLine, column);
-    const indexR = getIndexR(descendingLine, column);
-    const indexes = concatIdxs({ indexL, indexR });
-    reverseAscending({ state, indexes, row, column })
+    const indexL = this.getIndexL(descendingLine, column);
+    const indexR = this.getIndexR(descendingLine, column);
+    const indexes = this.concatIdxs({ indexL, indexR });
+    this.reverseAscending({ state, indexes, row, column })
   }
 
-  updateAscending(state, {ascendingLine, row, column}) {
-    const indexL = getIndexL(ascendingLine, column);
-    const indexR = getIndexR(ascendingLine, column);
-    const indexes = concatIdxs({ indexL, indexR });
-    reverseAscending({ state, indexes, row, column })
+  updateAscending(state, { ascendingLine, row, column }) {
+    const indexL = this.getIndexL(ascendingLine, column);
+    const indexR = this.getIndexR(ascendingLine, column);
+    const indexes = this.concatIdxs({ indexL, indexR });
+    this.reverseAscending({ state, indexes, row, column })
   }
 
   updateState(input) {
