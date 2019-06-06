@@ -50,14 +50,59 @@ class Model {
     return { horizontalLine, verticalLine, descendingLine, ascendingLine };
   }
 
+  getIndexL(line, rowOrColumn) {
+    const indexes = [];
+    const inputStoneColor = line[rowOrColumn];
+    for (let i = 1; i < 8 - rowOrColumn; i++) {
+      let nextStone = line[rowOrColumn + i];
+      if (nextStone == 0) return;
+      if (inputStoneColor === nextStone) return indexes;
+      indexes.push(rowOrColumn + i);
+    }
+  }
+
+  getIndexR(line, rowOrColumn) {
+    const indexes = [];
+    const inputStoneColor = line[rowOrColumn];
+    for (let i = 1; i < rowOrColumn + 1; i++) {
+      let prevStone = line[rowOrColumn - i];
+      if (prevStone == 0) return;
+      if (inputStoneColor === prevStone) return indexes;
+      indexes.push(rowOrColumn - i);
+    }
+  }
+
+  updateHorizontal(state, { horizontalLine, column }) {
+    const indexL = getIndexL(horizontalLine, column);
+    const indexR = getIndexR(horizontalLine, column);
+  }
+
+  updateVertical() {
+
+  }
+
+  updateDescending() {
+
+  }
+
+  updateAscending() {
+
+  }
+
   updateState(input) {
     const [row, column] = this.parseInput(input);
     if (this.validator.isOccupied(this.state, row, column)) return;
+
+    //TODO : 놓을 수 있는 자리인지 검증하는 로직
 
     this.setStone(this.state, this.turn, row, column);
 
     const { horizontalLine, verticalLine, descendingLine, ascendingLine } = this.getAffectedLines(this.state, row, column);
 
+    this.updateHorizontal(this.state, { horizontalLine, column });
+    this.updateVertical(this.state, { verticalLine, row, column });
+    this.updateDescending(this.state, { descendingLine, row, column });
+    this.updateAscending(this.state, { ascendingLine, row, column })
 
     this.changeTurn();
   }
