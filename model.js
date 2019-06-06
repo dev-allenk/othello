@@ -78,9 +78,41 @@ class Model {
     return [...indexL, ...indexR];
   }
 
+  reverseRow(indexes, line) {
+    indexes.forEach(el => {
+      if (line[el] === this.blackStone) line[el] = this.whiteStone;
+      else line[el] = this.blackStone;
+    })
+  }
+
+  reverseColumn(state, indexes, column) {
+    indexes.forEach(el => {
+      if (state[el][column] === this.blackStone) state[el][column] = this.whiteStone;
+      else state[el][column] = this.blackStone;
+    })
+  }
+
+  reverseDescending(state, indexes, row, column) {
+    const diff = Math.abs(row - column);
+    indexes.forEach(el => {
+      if (state[diff + el][el] === this.blackStone) state[diff + el][el] = this.whiteStone;
+      else state[diff + el][el] = this.blackStone;
+    })
+  }
+
+  reverseAscending(state, indexes, row, column) {
+    const sum = row + column;
+    indexes.forEach(el => {
+      if (state[sum - el][el] === this.blackStone) state[sum - el][el] = this.whiteStone;
+      else state[sum - el][el] = this.blackStone;
+    })
+  }
+
   updateHorizontal(state, { horizontalLine, column }) {
     const indexL = getIndexL(horizontalLine, column);
     const indexR = getIndexR(horizontalLine, column);
+    const indexes = concatIdxs({ indexL, indexR });
+
 
   }
 
