@@ -80,6 +80,7 @@ class Model {
   }
 
   reverseRow(indexes, line) {
+    if (!indexes) return;
     indexes.forEach(el => {
       if (line[el] === this.blackStone) line[el] = this.whiteStone;
       else line[el] = this.blackStone;
@@ -87,6 +88,7 @@ class Model {
   }
 
   reverseColumn({ state, indexes, column }) {
+    if (!indexes) return;
     indexes.forEach(el => {
       if (state[el][column] === this.blackStone) state[el][column] = this.whiteStone;
       else state[el][column] = this.blackStone;
@@ -94,6 +96,7 @@ class Model {
   }
 
   reverseDescending({ state, indexes, row, column }) {
+    if (!indexes) return;
     const diff = Math.abs(row - column);
     indexes.forEach(el => {
       if (state[diff + el][el] === this.blackStone) state[diff + el][el] = this.whiteStone;
@@ -102,6 +105,7 @@ class Model {
   }
 
   reverseAscending({ state, indexes, row, column }) {
+    if (!indexes) return;
     const sum = row + column;
     indexes.forEach(el => {
       if (state[sum - el][el] === this.blackStone) state[sum - el][el] = this.whiteStone;
