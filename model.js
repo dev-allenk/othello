@@ -28,12 +28,21 @@ class Model {
     else state[row][column] = this.whiteStone;
   }
 
+  getAffectedLines(state, row, column) {
+    const horizontalLine = state[row];
+    const verticalLine = state.map(el => el[column]);
+    const descendingLine = getDescendingLine(state, row, column);
+    const ascendingLine = getAscendingLine(state, row, column);
+    return { horizontalLine, verticalLine, descendingLine, ascendingLine };
+  }
+
   updateState(input) {
     const [row, column] = this.parseInput(input);
-
     if (this.validator.isOccupied(this.state, row, column)) return;
 
     this.setStone(this.state, this.turn, row, column);
+
+    const { horizontalLine, verticalLine, descendingLine, ascendingLine } = this.getAffectedLines();
 
     this.changeTurn();
   }
