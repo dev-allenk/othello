@@ -72,9 +72,16 @@ class Model {
     }
   }
 
+  concatIdxs({ indexL, indexR }) {
+    if (!indexL) return indexR;
+    if (!indexR) return indexL;
+    return [...indexL, ...indexR];
+  }
+
   updateHorizontal(state, { horizontalLine, column }) {
     const indexL = getIndexL(horizontalLine, column);
     const indexR = getIndexR(horizontalLine, column);
+
   }
 
   updateVertical() {
