@@ -85,14 +85,14 @@ class Model {
     })
   }
 
-  reverseColumn(state, indexes, column) {
+  reverseColumn({ state, indexes, column }) {
     indexes.forEach(el => {
       if (state[el][column] === this.blackStone) state[el][column] = this.whiteStone;
       else state[el][column] = this.blackStone;
     })
   }
 
-  reverseDescending(state, indexes, row, column) {
+  reverseDescending({ state, indexes, row, column }) {
     const diff = Math.abs(row - column);
     indexes.forEach(el => {
       if (state[diff + el][el] === this.blackStone) state[diff + el][el] = this.whiteStone;
@@ -100,7 +100,7 @@ class Model {
     })
   }
 
-  reverseAscending(state, indexes, row, column) {
+  reverseAscending({ state, indexes, row, column }) {
     const sum = row + column;
     indexes.forEach(el => {
       if (state[sum - el][el] === this.blackStone) state[sum - el][el] = this.whiteStone;
@@ -112,20 +112,28 @@ class Model {
     const indexL = getIndexL(horizontalLine, column);
     const indexR = getIndexR(horizontalLine, column);
     const indexes = concatIdxs({ indexL, indexR });
-
-
+    reverseRow(indexes, horizontalLine);
   }
 
-  updateVertical() {
-
+  updateVertical(state, { verticalLine, row, column }) {
+    const indexL = getIndexL(verticalLine, row);
+    const indexR = getIndexR(verticalLine, row);
+    const indexes = concatIdxs({ indexL, indexR });
+    reverseColumn({ indexes, state, column });
   }
 
-  updateDescending() {
-
+  updateDescending(state, { descendingLine, row, column }) {
+    const indexL = getIndexL(descendingLine, column);
+    const indexR = getIndexR(descendingLine, column);
+    const indexes = concatIdxs({ indexL, indexR });
+    reverseAscending({ state, indexes, row, column })
   }
 
-  updateAscending() {
-
+  updateAscending(state, {ascendingLine, row, column}) {
+    const indexL = getIndexL(ascendingLine, column);
+    const indexR = getIndexR(ascendingLine, column);
+    const indexes = concatIdxs({ indexL, indexR });
+    reverseAscending({ state, indexes, row, column })
   }
 
   updateState(input) {
