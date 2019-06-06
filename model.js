@@ -28,6 +28,20 @@ class Model {
     else state[row][column] = this.whiteStone;
   }
 
+  getDescendingLine(state, row, column) {
+    const diff = Math.abs(row - column);
+    return state.map((el, i) => {
+      if (i < 7) return state[diff + i][i];
+    })
+  }
+
+  getAscendingLine(state, row, column) {
+    const sum = row + column;
+    return state.map((el, i) => {
+      if (sum - i >= 0) return state[sum - i][i];
+    })
+  }
+
   getAffectedLines(state, row, column) {
     const horizontalLine = state[row];
     const verticalLine = state.map(el => el[column]);
@@ -42,7 +56,8 @@ class Model {
 
     this.setStone(this.state, this.turn, row, column);
 
-    const { horizontalLine, verticalLine, descendingLine, ascendingLine } = this.getAffectedLines();
+    const { horizontalLine, verticalLine, descendingLine, ascendingLine } = this.getAffectedLines(this.state, row, column);
+
 
     this.changeTurn();
   }
