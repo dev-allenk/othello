@@ -13,20 +13,27 @@ class Model {
     this.state[4][4] = this.whiteStone;
   }
 
+  //다른 객체로 분리해야할것 같음
   changeTurn() {
     if (this.turn === 'black') this.turn = 'white';
     else this.turn = 'black';
   }
 
+  parseInput(input) {
+    return [row, column] = input.split(' ').map(el => Number(el));
+  }
+
+  setStone(state, turn, row, column) {
+    if (turn === 'black') state[row][column] = this.blackStone;
+    else state[row][column] = this.whiteStone;
+  }
+
   updateState(input) {
-    input = input.split(' ').map(el => Number(el));
-    const row = input[0];
-    const column = input[1];
+    const [row, column] = this.parseInput(input);
 
     if (this.validator.isOccupied(this.state, row, column)) return;
 
-    if (this.turn === 'black') this.state[row][column] = this.blackStone;
-    else this.state[row][column] = this.whiteStone;
+    this.setStone(this.state, this.turn, row, column);
 
     this.changeTurn();
   }
