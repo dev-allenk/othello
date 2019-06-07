@@ -32,14 +32,16 @@ class Model {
   getDescendingLine(state, row, column) {
     const diff = Math.abs(row - column);
     return state.map((el, i) => {
-      if (i < 7) return state[diff + i][i];
+      if (row < column && i < 8 - diff) return state[i][diff + i];
+      if (row >= column && i < 8 - diff) return state[diff + i][i];
     })
   }
 
   getAscendingLine(state, row, column) {
     const sum = row + column;
     return state.map((el, i) => {
-      if (sum - i >= 0) return state[sum - i][i];
+      if (sum < 7 && i < sum + 1) return state[sum - i][i];
+      if (sum >= 7 && i < 15 - sum) return state[7 - i][sum - 7 + i];
     })
   }
 
@@ -81,6 +83,7 @@ class Model {
 
   reverseRow(indexes, line) {
     if (!indexes) return;
+    console.log('row', indexes)
     indexes.forEach(el => {
       if (line[el] === this.blackStone) line[el] = this.whiteStone;
       else line[el] = this.blackStone;
@@ -89,6 +92,7 @@ class Model {
 
   reverseColumn({ state, indexes, column }) {
     if (!indexes) return;
+    console.log('column', indexes)
     indexes.forEach(el => {
       if (state[el][column] === this.blackStone) state[el][column] = this.whiteStone;
       else state[el][column] = this.blackStone;
@@ -97,20 +101,38 @@ class Model {
 
   reverseDescending({ state, indexes, row, column }) {
     if (!indexes) return;
+    console.log('descend', indexes)
     const diff = Math.abs(row - column);
-    indexes.forEach(el => {
-      if (state[diff + el][el] === this.blackStone) state[diff + el][el] = this.whiteStone;
-      else state[diff + el][el] = this.blackStone;
-    })
+    if (row < column) {
+      indexes.forEach(el => {
+        if (state[el][diff + el] === 1) state[el][diff + el] = 2;
+        else state[el][diff + el] = 1;
+      })
+    }
+    else {
+      indexes.forEach(el => {
+        if (state[diff + el][el] === 1) state[diff + el][el] = 2;
+        else state[diff + el][el] = 1;
+      })
+    }
   }
 
   reverseAscending({ state, indexes, row, column }) {
     if (!indexes) return;
+    console.log('ascend', indexes)
     const sum = row + column;
-    indexes.forEach(el => {
-      if (state[sum - el][el] === this.blackStone) state[sum - el][el] = this.whiteStone;
-      else state[sum - el][el] = this.blackStone;
-    })
+    if (sum < 7) {
+      indexes.forEach(el => {
+        if (state[sum - el][el] === 1) state[sum - el][el] = 2;
+        else state[sum - el][el] = 1;
+      })
+    }
+    else {
+      indexes.forEach(el => {
+        if (state[7 - el][sum - 7 + el] === 1) state[7 - el][sum - 7 + el] = 2;
+        else state[7 - el][sum - 7 + el] = 1;
+      })
+    }
   }
 
   updateHorizontal(state, { horizontalLine, column }) {
@@ -128,15 +150,22 @@ class Model {
   }
 
   updateDescending(state, { descendingLine, row, column }) {
-    const indexL = this.getIndexL(descendingLine, column);
-    const indexR = this.getIndexR(descendingLine, column);
+    let roc;
+    if(row < column) roc = row;
+    else roc = column;
+    const indexL = this.getIndexL(descendingLine, roc);
+    const indexR = this.getIndexR(descendingLine, roc);
     const indexes = this.concatIdxs({ indexL, indexR });
-    this.reverseAscending({ state, indexes, row, column })
+    console.log(indexes);
+    this.reverseDescending({ state, indexes, row, column })
   }
 
   updateAscending(state, { ascendingLine, row, column }) {
-    const indexL = this.getIndexL(ascendingLine, column);
-    const indexR = this.getIndexR(ascendingLine, column);
+    let roc;
+    if(row + column < 7) roc = column;
+    else roc = 7 - row;
+    const indexL = this.getIndexL(ascendingLine, roc);
+    const indexR = this.getIndexR(ascendingLine, roc);
     const indexes = this.concatIdxs({ indexL, indexR });
     this.reverseAscending({ state, indexes, row, column })
   }
@@ -150,6 +179,10 @@ class Model {
     this.setStone(this.state, this.turn, row, column);
 
     const { horizontalLine, verticalLine, descendingLine, ascendingLine } = this.getAffectedLines(this.state, row, column);
+    console.log('horizontal(row)', horizontalLine)
+    console.log('vertical(column)', verticalLine)
+    console.log('descending', descendingLine)
+    console.log('ascending', ascendingLine)
 
     this.updateHorizontal(this.state, { horizontalLine, column });
     this.updateVertical(this.state, { verticalLine, row, column });
