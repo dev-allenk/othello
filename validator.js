@@ -1,8 +1,11 @@
 class Validator {
   isOccupied(state, row, column) {
     if (state[row][column]) return true;
-    console.log('이미 돌이 놓인 자리입니다!')
     return false;
+  }
+  isInvalidInput({ resultH, resultV, resultD, resultA }) {
+    if ([resultH, resultV, resultD, resultA].filter(Boolean).length) return false;
+    return true;
   }
 }
 

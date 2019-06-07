@@ -58,7 +58,7 @@ class Model {
     const inputStoneColor = line[rowOrColumn];
     for (let i = 1; i < 8 - rowOrColumn; i++) {
       let nextStone = line[rowOrColumn + i];
-      if (nextStone == 0) return;
+      if (nextStone === 0 || nextStone === undefined) return [];
       if (inputStoneColor === nextStone) return indexes;
       indexes.push(rowOrColumn + i);
     }
@@ -69,7 +69,7 @@ class Model {
     const inputStoneColor = line[rowOrColumn];
     for (let i = 1; i < rowOrColumn + 1; i++) {
       let prevStone = line[rowOrColumn - i];
-      if (prevStone == 0) return;
+      if (prevStone === 0 || prevStone === undefined) return [];
       if (inputStoneColor === prevStone) return indexes;
       indexes.push(rowOrColumn - i);
     }
@@ -82,25 +82,27 @@ class Model {
   }
 
   reverseRow(indexes, line) {
-    if (!indexes) return;
+    if (!indexes.length) return;
     console.log('row', indexes)
     indexes.forEach(el => {
       if (line[el] === this.blackStone) line[el] = this.whiteStone;
       else line[el] = this.blackStone;
     })
+    return 'done';
   }
 
   reverseColumn({ state, indexes, column }) {
-    if (!indexes) return;
+    if (!indexes.length) return;
     console.log('column', indexes)
     indexes.forEach(el => {
       if (state[el][column] === this.blackStone) state[el][column] = this.whiteStone;
       else state[el][column] = this.blackStone;
     })
+    return 'done';
   }
 
   reverseDescending({ state, indexes, row, column }) {
-    if (!indexes) return;
+    if (!indexes.length) return;
     console.log('descend', indexes)
     const diff = Math.abs(row - column);
     if (row < column) {
@@ -115,10 +117,11 @@ class Model {
         else state[diff + el][el] = 1;
       })
     }
+    return 'done';
   }
 
   reverseAscending({ state, indexes, row, column }) {
-    if (!indexes) return;
+    if (!indexes.length) return;
     console.log('ascend', indexes)
     const sum = row + column;
     if (sum < 7) {
@@ -133,62 +136,66 @@ class Model {
         else state[7 - el][sum - 7 + el] = 1;
       })
     }
+    return 'done';
   }
 
   updateHorizontal(state, { horizontalLine, column }) {
     const indexL = this.getIndexL(horizontalLine, column);
     const indexR = this.getIndexR(horizontalLine, column);
     const indexes = this.concatIdxs({ indexL, indexR });
-    this.reverseRow(indexes, horizontalLine);
+    return this.reverseRow(indexes, horizontalLine);
   }
 
   updateVertical(state, { verticalLine, row, column }) {
     const indexL = this.getIndexL(verticalLine, row);
     const indexR = this.getIndexR(verticalLine, row);
     const indexes = this.concatIdxs({ indexL, indexR });
-    this.reverseColumn({ indexes, state, column });
+    return this.reverseColumn({ indexes, state, column });
   }
 
   updateDescending(state, { descendingLine, row, column }) {
     let roc;
-    if(row < column) roc = row;
+    if (row < column) roc = row;
     else roc = column;
     const indexL = this.getIndexL(descendingLine, roc);
     const indexR = this.getIndexR(descendingLine, roc);
     const indexes = this.concatIdxs({ indexL, indexR });
-    console.log(indexes);
-    this.reverseDescending({ state, indexes, row, column })
+    return this.reverseDescending({ state, indexes, row, column })
   }
 
   updateAscending(state, { ascendingLine, row, column }) {
     let roc;
-    if(row + column < 7) roc = column;
+    if (row + column < 7) roc = column;
     else roc = 7 - row;
     const indexL = this.getIndexL(ascendingLine, roc);
     const indexR = this.getIndexR(ascendingLine, roc);
     const indexes = this.concatIdxs({ indexL, indexR });
-    this.reverseAscending({ state, indexes, row, column })
+    return this.reverseAscending({ state, indexes, row, column })
   }
 
   updateState(input) {
     const [row, column] = this.parseInput(input);
     if (this.validator.isOccupied(this.state, row, column)) return;
 
-    //TODO : 놓을 수 있는 자리인지 검증하는 로직
+    const stateCopy = this.state.map(el => [...el]);
 
-    this.setStone(this.state, this.turn, row, column);
+    this.setStone(stateCopy, this.turn, row, column);
 
-    const { horizontalLine, verticalLine, descendingLine, ascendingLine } = this.getAffectedLines(this.state, row, column);
+    const { horizontalLine, verticalLine, descendingLine, ascendingLine } = this.getAffectedLines(stateCopy, row, column);
     console.log('horizontal(row)', horizontalLine)
     console.log('vertical(column)', verticalLine)
     console.log('descending', descendingLine)
     console.log('ascending', ascendingLine)
 
-    this.updateHorizontal(this.state, { horizontalLine, column });
-    this.updateVertical(this.state, { verticalLine, row, column });
-    this.updateDescending(this.state, { descendingLine, row, column });
-    this.updateAscending(this.state, { ascendingLine, row, column })
+    const resultH = this.updateHorizontal(stateCopy, { horizontalLine, column });
+    const resultV = this.updateVertical(stateCopy, { verticalLine, row, column });
+    const resultD = this.updateDescending(stateCopy, { descendingLine, row, column });
+    const resultA = this.updateAscending(stateCopy, { ascendingLine, row, column })
 
+    //놓을 수 있는 자리인지 검증
+    if (this.validator.isInvalidInput({ resultH, resultV, resultD, resultA })) return console.log('놓을 수 없는 자리입니다');
+
+    this.state = stateCopy;
     this.changeTurn();
   }
 
