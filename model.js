@@ -19,6 +19,7 @@ class Model {
     else this.turn = 'black';
   }
 
+  //이것도 분리하는게 나을듯
   parseInput(input) {
     const [row, column] = input.split(' ').map(el => Number(el));
     return [row, column];
@@ -50,6 +51,12 @@ class Model {
     const verticalLine = state.map(el => el[column]);
     const descendingLine = this.getDescendingLine(state, row, column);
     const ascendingLine = this.getAscendingLine(state, row, column);
+    
+    //디버깅용
+    console.log('horizontal(row)', horizontalLine)
+    console.log('vertical(column)', verticalLine)
+    console.log('descending', descendingLine)
+    console.log('ascending', ascendingLine)
     return { horizontalLine, verticalLine, descendingLine, ascendingLine };
   }
 
@@ -83,7 +90,7 @@ class Model {
 
   reverseRow(indexes, line) {
     if (!indexes.length) return;
-    console.log('row', indexes)
+    console.log('row', indexes) //디버깅용
     indexes.forEach(el => {
       if (line[el] === this.blackStone) line[el] = this.whiteStone;
       else line[el] = this.blackStone;
@@ -93,7 +100,7 @@ class Model {
 
   reverseColumn({ state, indexes, column }) {
     if (!indexes.length) return;
-    console.log('column', indexes)
+    console.log('column', indexes) //디버깅용
     indexes.forEach(el => {
       if (state[el][column] === this.blackStone) state[el][column] = this.whiteStone;
       else state[el][column] = this.blackStone;
@@ -103,7 +110,7 @@ class Model {
 
   reverseDescending({ state, indexes, row, column }) {
     if (!indexes.length) return;
-    console.log('descend', indexes)
+    console.log('descend', indexes) //디버깅용
     const diff = Math.abs(row - column);
     if (row < column) {
       indexes.forEach(el => {
@@ -122,7 +129,7 @@ class Model {
 
   reverseAscending({ state, indexes, row, column }) {
     if (!indexes.length) return;
-    console.log('ascend', indexes)
+    console.log('ascend', indexes) //디버깅용
     const sum = row + column;
     if (sum < 7) {
       indexes.forEach(el => {
@@ -139,27 +146,27 @@ class Model {
     return 'done';
   }
 
+  getIndexes(line, roc) {
+    const indexL = this.getIndexL(line, roc);
+    const indexR = this.getIndexR(line, roc);
+    return this.concatIdxs({ indexL, indexR });
+  }
+
   updateHorizontal(state, { horizontalLine, column }) {
-    const indexL = this.getIndexL(horizontalLine, column);
-    const indexR = this.getIndexR(horizontalLine, column);
-    const indexes = this.concatIdxs({ indexL, indexR });
+    const indexes = this.getIndexes(horizontalLine, column)
     return this.reverseRow(indexes, horizontalLine);
   }
 
   updateVertical(state, { verticalLine, row, column }) {
-    const indexL = this.getIndexL(verticalLine, row);
-    const indexR = this.getIndexR(verticalLine, row);
-    const indexes = this.concatIdxs({ indexL, indexR });
+    const indexes = this.getIndexes(verticalLine, row)
     return this.reverseColumn({ indexes, state, column });
   }
-
+  
   updateDescending(state, { descendingLine, row, column }) {
     let roc;
     if (row < column) roc = row;
     else roc = column;
-    const indexL = this.getIndexL(descendingLine, roc);
-    const indexR = this.getIndexR(descendingLine, roc);
-    const indexes = this.concatIdxs({ indexL, indexR });
+    const indexes = this.getIndexes(descendingLine, roc)
     return this.reverseDescending({ state, indexes, row, column })
   }
 
@@ -167,9 +174,7 @@ class Model {
     let roc;
     if (row + column < 7) roc = column;
     else roc = 7 - row;
-    const indexL = this.getIndexL(ascendingLine, roc);
-    const indexR = this.getIndexR(ascendingLine, roc);
-    const indexes = this.concatIdxs({ indexL, indexR });
+    const indexes = this.getIndexes(ascendingLine, roc)
     return this.reverseAscending({ state, indexes, row, column })
   }
 
@@ -177,16 +182,16 @@ class Model {
     const [row, column] = this.parseInput(input);
     if (this.validator.isOccupied(this.state, row, column)) return;
 
+    //복사본 만들기
     const stateCopy = this.state.map(el => [...el]);
 
+    //복사본에 돌을 놓는다
     this.setStone(stateCopy, this.turn, row, column);
 
+    //8방향을 배열에 담는다
     const { horizontalLine, verticalLine, descendingLine, ascendingLine } = this.getAffectedLines(stateCopy, row, column);
-    console.log('horizontal(row)', horizontalLine)
-    console.log('vertical(column)', verticalLine)
-    console.log('descending', descendingLine)
-    console.log('ascending', ascendingLine)
 
+    //각 라인별 보드 업데이트. result는 'done' or undefined
     const resultH = this.updateHorizontal(stateCopy, { horizontalLine, column });
     const resultV = this.updateVertical(stateCopy, { verticalLine, row, column });
     const resultD = this.updateDescending(stateCopy, { descendingLine, row, column });
@@ -195,7 +200,9 @@ class Model {
     //놓을 수 있는 자리인지 검증
     if (this.validator.isInvalidInput({ resultH, resultV, resultD, resultA })) return console.log('놓을 수 없는 자리입니다');
 
+    //원본을 복사본으로 교체
     this.state = stateCopy;
+
     this.changeTurn();
   }
 
