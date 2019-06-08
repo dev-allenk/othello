@@ -138,6 +138,27 @@ class Model {
     return map[directionType]();
   }
 
+  isAnyPossibleInput() {
+    const types = ['horizontal', 'vertical', 'descendDiagonal', 'ascendDiagonal'];
+    const turn = this.turn === 'black' ? this.blackStone : this.whiteStone;
+    const possibility = [];
+    for (let row = 0; row < 8; row++) {
+      for (let column = 0; column < 8; column++) {
+        if (this.validator.isOccupied(this.state, row, column)) continue;
+
+        const state = this.state.map(el => [...el]);
+
+        state[row][column] = turn;
+
+        const result = types.map(directionType => this.updateState({ state, directionType, row, column }));
+
+        if (this.validator.isInvalidInput(result)) continue;
+        possibility.push(true);
+      }
+    }
+    return possibility.filter(Boolean).length === 0 ? false : true;
+  }
+
   executeUpdate({ row, column }) {
     if (this.validator.isOccupied(this.state, row, column)) return console.log('이미 돌이 놓여있는 자리입니다.');
 
@@ -149,9 +170,6 @@ class Model {
 
     //돌을 뒤집을 수 있으면 뒤집는다
     const types = ['horizontal', 'vertical', 'descendDiagonal', 'ascendDiagonal'];
-    // for (let directionType of types) {
-    //   this.updateState({ state, directionType, row, column });
-    // }
     const result = types.map(directionType => this.updateState({ state, directionType, row, column }));
 
     if (this.validator.isInvalidInput(result)) return console.log('놓을 수 없는 자리입니다.')

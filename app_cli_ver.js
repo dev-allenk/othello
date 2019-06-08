@@ -27,12 +27,16 @@ const app = {
 
     rl.setPrompt(`${model.turn}의 턴입니다. : `);
     rl.prompt();
-
+    
     rl.on('line', (input) => {
       const {row, column} = this.parseInput(input);
       model.executeUpdate({row, column});
       view.showState(model.state);
-
+      
+      if(!model.isAnyPossibleInput()) {
+        console.log('놓을 수 있는 자리가 없어 턴을 넘깁니다.')
+        model.changeTurn();
+      }
       rl.setPrompt(`${model.turn}의 턴입니다. : `);
       rl.prompt();
     })
