@@ -19,18 +19,12 @@ class Model {
     else this.turn = 'black';
   }
 
-  //이것도 분리하는게 나을듯
-  parseInput(input) {
-    const [row, column] = input.split(' ').map(el => Number(el));
-    return [row, column];
-  }
-
   setStone(state, turn, row, column) {
     if (turn === 'black') state[row][column] = this.blackStone;
     else state[row][column] = this.whiteStone;
   }
 
-  getDescendingLine(state, row, column) {
+  getDescendDiagonal({ state, row, column }) {
     const diff = Math.abs(row - column);
     return state.map((el, i) => {
       if (row < column && i < 8 - diff) return state[i][diff + i];
@@ -38,7 +32,7 @@ class Model {
     })
   }
 
-  getAscendingLine(state, row, column) {
+  getAscenedDiagonal({ state, row, column }) {
     const sum = row + column;
     return state.map((el, i) => {
       if (sum < 7 && i < sum + 1) return state[sum - i][i];
@@ -46,18 +40,14 @@ class Model {
     })
   }
 
-  getAffectedLines(state, row, column) {
-    const horizontalLine = state[row];
-    const verticalLine = state.map(el => el[column]);
-    const descendingLine = this.getDescendingLine(state, row, column);
-    const ascendingLine = this.getAscendingLine(state, row, column);
-    
-    //디버깅용
-    console.log('horizontal(row)', horizontalLine)
-    console.log('vertical(column)', verticalLine)
-    console.log('descending', descendingLine)
-    console.log('ascending', ascendingLine)
-    return { horizontalLine, verticalLine, descendingLine, ascendingLine };
+  getAffectedLine({ state, directionType, row, column }) {
+    const map = {
+      horizontal: () => state[row],
+      vertical: () => state.map(el => el[column]),
+      descendDiagonal: () => this.getDescendDiagonal({ state, row, column }),
+      ascendDiagonal: () => this.getAscenedDiagonal({ state, row, column })
+    }
+    return map[directionType]();
   }
 
   getIndexR(line, rowOrColumn) {
@@ -69,6 +59,7 @@ class Model {
       if (inputStoneColor === nextStone) return indexes;
       indexes.push(rowOrColumn + i);
     }
+    return [];
   }
 
   getIndexL(line, rowOrColumn) {
@@ -80,132 +71,95 @@ class Model {
       if (inputStoneColor === prevStone) return indexes;
       indexes.push(rowOrColumn - i);
     }
+    return [];
   }
 
-  concatIdxs({ indexL, indexR }) {
-    if (!indexL) return indexR;
-    if (!indexR) return indexL;
+  getIndexes(line, rowOrColumn) {
+    const indexL = this.getIndexL(line, rowOrColumn);
+    const indexR = this.getIndexR(line, rowOrColumn);
     return [...indexL, ...indexR];
   }
 
-  reverseRow(indexes, line) {
-    if (!indexes.length) return;
-    console.log('row', indexes) //디버깅용
-    indexes.forEach(el => {
-      if (line[el] === this.blackStone) line[el] = this.whiteStone;
-      else line[el] = this.blackStone;
-    })
-    return 'done';
-  }
-
-  reverseColumn({ state, indexes, column }) {
-    if (!indexes.length) return;
-    console.log('column', indexes) //디버깅용
-    indexes.forEach(el => {
-      if (state[el][column] === this.blackStone) state[el][column] = this.whiteStone;
-      else state[el][column] = this.blackStone;
-    })
-    return 'done';
-  }
-
-  reverseDescending({ state, indexes, row, column }) {
-    if (!indexes.length) return;
-    console.log('descend', indexes) //디버깅용
+  executeReverse({ type, state, indexes, row, column }) {
     const diff = Math.abs(row - column);
-    if (row < column) {
-      indexes.forEach(el => {
-        if (state[el][diff + el] === 1) state[el][diff + el] = 2;
-        else state[el][diff + el] = 1;
-      })
-    }
-    else {
-      indexes.forEach(el => {
-        if (state[diff + el][el] === 1) state[diff + el][el] = 2;
-        else state[diff + el][el] = 1;
-      })
-    }
-    return 'done';
-  }
-
-  reverseAscending({ state, indexes, row, column }) {
-    if (!indexes.length) return;
-    console.log('ascend', indexes) //디버깅용
     const sum = row + column;
-    if (sum < 7) {
-      indexes.forEach(el => {
-        if (state[sum - el][el] === 1) state[sum - el][el] = 2;
-        else state[sum - el][el] = 1;
-      })
+    const map = {
+      horizontal: (el) => state[row][el] === this.blackStone ? state[row][el] = this.whiteStone : state[row][el] = this.blackStone,
+      vertical: (el) => state[el][column] === this.blackStone ? state[el][column] = this.whiteStone : state[el][column] = this.blackStone,
+      descendA: (el) => state[el][diff + el] === this.blackStone ? state[el][diff + el] = this.whiteStone : state[el][diff + el] = this.blackStone, //row < column
+      descendB: (el) => state[diff + el][el] === this.blackStone ? state[diff + el][el] = this.whiteStone : state[diff + el][el] = this.blackStone, //row >= column
+      ascendA: (el) => state[sum - el][el] === this.blackStone ? state[sum - el][el] = this.whiteStone : state[sum - el][el] = this.blackStone, //sum < 7
+      ascendB: (el) => state[7 - el][sum - 7 + el] === this.blackStone ? state[7 - el][sum - 7 + el] = this.whiteStone : state[7 - el][sum - 7 + el] = this.blackStone //sum >= 7
     }
-    else {
-      indexes.forEach(el => {
-        if (state[7 - el][sum - 7 + el] === 1) state[7 - el][sum - 7 + el] = 2;
-        else state[7 - el][sum - 7 + el] = 1;
-      })
+    for (let el of indexes) {
+      map[type](el);
     }
     return 'done';
   }
 
-  getIndexes(line, roc) {
-    const indexL = this.getIndexL(line, roc);
-    const indexR = this.getIndexR(line, roc);
-    return this.concatIdxs({ indexL, indexR });
+  getRoc({ directionType, row, column }) {
+    const rocmap = {
+      horizontal: () => column,
+      vertical: () => row,
+      descendDiagonal: () => {
+        let roc;
+        if (row < column) roc = row;
+        else roc = column;
+        return roc;
+      },
+      ascendDiagonal: () => {
+        let roc;
+        if (row + column < 7) roc = column;
+        else roc = 7 - row;
+        return roc;
+      }
+    }
+    return rocmap[directionType]();
   }
 
-  updateHorizontal(state, { horizontalLine, column }) {
-    const indexes = this.getIndexes(horizontalLine, column)
-    return this.reverseRow(indexes, horizontalLine);
+  updateState({ state, directionType, row, column }) {
+    const line = this.getAffectedLine({ state, directionType, row, column });
+    const roc = this.getRoc({ directionType, row, column });
+    const indexes = this.getIndexes(line, roc);
+    if (!indexes.length) return;
+
+    const map = {
+      horizontal: () => this.executeReverse({ type: 'horizontal', state, indexes, row, column }),
+      vertical: () => this.executeReverse({ type: 'vertical', state, indexes, row, column }),
+      descendDiagonal: () => {
+        if (row < column) return this.executeReverse({ type: 'descendA', state, indexes, row, column })
+        else return this.executeReverse({ type: 'descendB', state, indexes, row, column })
+      },
+      ascendDiagonal: () => {
+        if (row + column < 7) return this.executeReverse({ type: 'ascendA', state, indexes, row, column })
+        else return this.executeReverse({ type: 'ascendB', state, indexes, row, column })
+      }
+    }
+    return map[directionType]();
   }
 
-  updateVertical(state, { verticalLine, row, column }) {
-    const indexes = this.getIndexes(verticalLine, row)
-    return this.reverseColumn({ indexes, state, column });
-  }
-  
-  updateDescending(state, { descendingLine, row, column }) {
-    let roc;
-    if (row < column) roc = row;
-    else roc = column;
-    const indexes = this.getIndexes(descendingLine, roc)
-    return this.reverseDescending({ state, indexes, row, column })
-  }
-
-  updateAscending(state, { ascendingLine, row, column }) {
-    let roc;
-    if (row + column < 7) roc = column;
-    else roc = 7 - row;
-    const indexes = this.getIndexes(ascendingLine, roc)
-    return this.reverseAscending({ state, indexes, row, column })
-  }
-
-  updateState(input) {
-    const [row, column] = this.parseInput(input);
-    if (this.validator.isOccupied(this.state, row, column)) return;
+  executeUpdate({ row, column }) {
+    if (this.validator.isOccupied(this.state, row, column)) return console.log('이미 돌이 놓여있는 자리입니다.');
 
     //복사본 만들기
-    const stateCopy = this.state.map(el => [...el]);
+    const state = this.state.map(el => [...el]);
 
     //복사본에 돌을 놓는다
-    this.setStone(stateCopy, this.turn, row, column);
+    this.setStone(state, this.turn, row, column);
 
-    //8방향을 배열에 담는다
-    const { horizontalLine, verticalLine, descendingLine, ascendingLine } = this.getAffectedLines(stateCopy, row, column);
+    //돌을 뒤집을 수 있으면 뒤집는다
+    const types = ['horizontal', 'vertical', 'descendDiagonal', 'ascendDiagonal'];
+    // for (let directionType of types) {
+    //   this.updateState({ state, directionType, row, column });
+    // }
+    const result = types.map(directionType => this.updateState({ state, directionType, row, column }));
 
-    //각 라인별 보드 업데이트. result는 'done' or undefined
-    const resultH = this.updateHorizontal(stateCopy, { horizontalLine, column });
-    const resultV = this.updateVertical(stateCopy, { verticalLine, row, column });
-    const resultD = this.updateDescending(stateCopy, { descendingLine, row, column });
-    const resultA = this.updateAscending(stateCopy, { ascendingLine, row, column })
-
-    //놓을 수 있는 자리인지 검증
-    if (this.validator.isInvalidInput({ resultH, resultV, resultD, resultA })) return console.log('놓을 수 없는 자리입니다');
+    if (this.validator.isInvalidInput(result)) return console.log('놓을 수 없는 자리입니다.')
 
     //원본을 복사본으로 교체
-    this.state = stateCopy;
+    this.state = state;
 
     this.changeTurn();
   }
-
 }
-
 module.exports = Model;

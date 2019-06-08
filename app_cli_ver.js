@@ -16,6 +16,11 @@ const view = new View();
 const model = new Model({ blackStone, whiteStone, validator });
 
 const app = {
+  parseInput(input) {
+    const [row, column] = input.split(' ').map(el => Number(el));
+    return {row, column};
+  },
+
   start() {
     model.init();
     view.showState(model.state);
@@ -24,7 +29,8 @@ const app = {
     rl.prompt();
 
     rl.on('line', (input) => {
-      model.updateState(input);
+      const {row, column} = this.parseInput(input);
+      model.executeUpdate({row, column});
       view.showState(model.state);
 
       rl.setPrompt(`${model.turn}의 턴입니다. : `);

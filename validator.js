@@ -3,8 +3,8 @@ class Validator {
     if (state[row][column]) return true;
     return false;
   }
-  isInvalidInput({ resultH, resultV, resultD, resultA }) {
-    if ([resultH, resultV, resultD, resultA].filter(Boolean).length) return false;
+  isInvalidInput(result) {
+    if (result.filter(Boolean).length) return false;
     return true;
   }
 }
