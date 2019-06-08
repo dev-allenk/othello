@@ -189,5 +189,9 @@ class Model {
     return false;
   }
 
+  countStones(state, stoneType) {
+    const flatState = state.reduce((acc, curr) => [...acc, ...curr]);
+    return flatState.filter(el => el === stoneType).length;
+  }
 }
 module.exports = Model;

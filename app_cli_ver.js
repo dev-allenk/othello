@@ -18,7 +18,7 @@ const model = new Model({ blackStone, whiteStone, validator });
 const app = {
   parseInput(input) {
     const [row, column] = input.split(' ').map(el => Number(el));
-    return {row, column};
+    return { row, column };
   },
 
   start() {
@@ -27,16 +27,22 @@ const app = {
 
     rl.setPrompt(`${model.turn}의 턴입니다. : `);
     rl.prompt();
-    
+
     rl.on('line', (input) => {
-      const {row, column} = this.parseInput(input);
-      model.executeUpdate({row, column});
+      const { row, column } = this.parseInput(input);
+      model.executeUpdate({ row, column });
       view.showState(model.state);
-      
-      if(model.isGameEnd(model.state)) {
-        console.log(`게임을 종료합니다.`)
+
+      if (model.isGameEnd(model.state)) {
+        const blackScore = model.countStones(model.state, model.blackStone);
+        const whiteScore = model.countStones(model.state, model.whiteStone);
+        if (blackScore === whiteScore) console.log(`게임을 종료합니다. 무승부입니다.`);
+        else {
+          const winner = blackScore < whiteScore ? 'white' : 'black';
+          console.log(`게임을 종료합니다. ${winner}의 승리입니다.`)
+        }
       }
-      if(!model.hasAnyPossibleInput(model.turn)) {
+      if (!model.hasAnyPossibleInput(model.turn)) {
         console.log('놓을 수 있는 자리가 없어 턴을 넘깁니다.')
         model.changeTurn();
       }
