@@ -33,7 +33,10 @@ const app = {
       model.executeUpdate({row, column});
       view.showState(model.state);
       
-      if(!model.isAnyPossibleInput()) {
+      if(model.isGameEnd(model.state)) {
+        console.log(`게임을 종료합니다.`)
+      }
+      if(!model.hasAnyPossibleInput(model.turn)) {
         console.log('놓을 수 있는 자리가 없어 턴을 넘깁니다.')
         model.changeTurn();
       }

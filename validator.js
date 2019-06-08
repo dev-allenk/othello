@@ -1,6 +1,6 @@
 class Validator {
-  isOccupied(state, row, column) {
-    if (state[row][column]) return true;
+  isOccupied(stone) {
+    if (stone !== 0) return true;
     return false;
   }
   isInvalidInput(result) {

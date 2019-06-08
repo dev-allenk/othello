@@ -138,29 +138,8 @@ class Model {
     return map[directionType]();
   }
 
-  isAnyPossibleInput() {
-    const types = ['horizontal', 'vertical', 'descendDiagonal', 'ascendDiagonal'];
-    const turn = this.turn === 'black' ? this.blackStone : this.whiteStone;
-    const possibility = [];
-    for (let row = 0; row < 8; row++) {
-      for (let column = 0; column < 8; column++) {
-        if (this.validator.isOccupied(this.state, row, column)) continue;
-
-        const state = this.state.map(el => [...el]);
-
-        state[row][column] = turn;
-
-        const result = types.map(directionType => this.updateState({ state, directionType, row, column }));
-
-        if (this.validator.isInvalidInput(result)) continue;
-        possibility.push(true);
-      }
-    }
-    return possibility.filter(Boolean).length === 0 ? false : true;
-  }
-
   executeUpdate({ row, column }) {
-    if (this.validator.isOccupied(this.state, row, column)) return console.log('이미 돌이 놓여있는 자리입니다.');
+    if (this.validator.isOccupied(this.state[row][column])) return console.log('이미 돌이 놓여있는 자리입니다.');
 
     //복사본 만들기
     const state = this.state.map(el => [...el]);
@@ -179,5 +158,36 @@ class Model {
 
     this.changeTurn();
   }
+
+  hasAnyPossibleInput(turn) {
+    const types = ['horizontal', 'vertical', 'descendDiagonal', 'ascendDiagonal'];
+    const stone = turn === 'black' ? this.blackStone : this.whiteStone;
+    const possibility = [];
+    for (let row = 0; row < 8; row++) {
+      for (let column = 0; column < 8; column++) {
+        if (this.validator.isOccupied(this.state[row][column])) continue;
+
+        const state = this.state.map(el => [...el]);
+
+        state[row][column] = stone;
+
+        const result = types.map(directionType => this.updateState({ state, directionType, row, column }));
+
+        if (this.validator.isInvalidInput(result)) continue;
+        possibility.push(true);
+      }
+    }
+    return possibility.filter(Boolean).length === 0 ? false : true;
+  }
+
+  isGameEnd(state) {
+    const flatState = state.reduce((acc, curr) => [...acc, ...curr]);
+    const stateWithoutEmpty = flatState.filter(Boolean);
+    if (flatState.every(el => el !== 0)) return true;
+    if (stateWithoutEmpty.every(el => el === 1) || stateWithoutEmpty.every(el => el === 2)) return true;
+    if (!this.hasAnyPossibleInput('black') || !this.hasAnyPossibleInput('white')) return true;
+    return false;
+  }
+
 }
 module.exports = Model;
