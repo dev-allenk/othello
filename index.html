@@ -12,22 +12,39 @@
       html * {
         box-sizing: border-box;
         margin: 0;
+        padding: 0;
+      }
+      .wrapper {
+        width: 36rem;
+        margin: 0 auto;
+      }
+      h1 {
+        text-align: center;
       }
       table {
-        margin: 0 auto;
-        width: 36rem;
-        height: 36rem;
+        width: 100%;
+        height: 100%;
         border: 1px solid gray;
       }
       td {
         width: 4rem;
         height: 4rem;
         border: 1px solid gray;
+        background-color: #27ae60;
+      }
+      .black {
+        background-color: black;
+        background-size: cover;
+      }
+      .white {
+        background-color: white;
+        background-size: cover;
       }
     </style>
   </head>
   <body>
     <div class="wrapper">
+      <h1>My Othello</h1>
       <table class="board"></table>
     </div>
     <script src="./app.js"></script>

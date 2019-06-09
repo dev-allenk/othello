@@ -13,7 +13,14 @@ class View {
   showState(state) {
     const td = document.querySelectorAll('td');
     for (let i = 0; i < 64; i++) {
-      td[i].innerText = state[parseInt(i / 8)][i % 8];
+      if (state[parseInt(i / 8)][i % 8] === 1) {
+        td[i].classList.remove('white');
+        td[i].classList.add('black');
+      }
+      if (state[parseInt(i / 8)][i % 8] === 2) {
+        td[i].classList.remove('black');
+        td[i].classList.add('white');
+      }
     }
   }
 
@@ -179,7 +186,7 @@ class Model {
     this.state = state;
     this.changeTurn();
   }
-  
+
   hasAnyPossibleInput(turn) {
     const types = ['horizontal', 'vertical', 'descendDiagonal', 'ascendDiagonal'];
     const stone = turn === 'black' ? this.blackStone : this.whiteStone;
