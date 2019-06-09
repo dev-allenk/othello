@@ -10,6 +10,13 @@ class Validator {
 }
 
 class View {
+  init() {
+    const td = document.querySelectorAll('td');
+    for (let i = 0; i < 64; i++) {
+      td[i].classList.remove('black');
+      td[i].classList.remove('white');
+    }
+  }
   showState(state) {
     const td = document.querySelectorAll('td');
     for (let i = 0; i < 64; i++) {
@@ -47,6 +54,7 @@ class Model {
     this.whiteStone = whiteStone;
   }
   init() {
+    console.log('init!')
     this.state = Array(8).fill(null).map(() => Array(8).fill(0));
     this.state[3][4] = this.blackStone;
     this.state[4][3] = this.blackStone;
@@ -220,9 +228,14 @@ class Model {
 }
 
 class Controller {
+  constructor({ model, view }) {
+    this.model = model;
+    this.view = view;
+  }
   init() {
-    model.init();
-    view.showState(model.state)
+    this.view.init();
+    this.model.init();
+    this.view.showState(this.model.state)
   }
   parseInput(input) {
     const [row, column] = input.split('').map(el => Number(el));
@@ -236,11 +249,11 @@ const whiteStone = 2;
 const validator = new Validator();
 const view = new View();
 const model = new Model({ blackStone, whiteStone, validator });
-const controller = new Controller();
+const controller = new Controller({ model, view });
 
 const app = {
+
   start() {
-    controller.init();
     const td = document.querySelectorAll('td');
     for (let el of td) {
       el.addEventListener('click', function (event) {
@@ -261,9 +274,14 @@ const app = {
           model.changeTurn();
         }
       })
+      const restartBtn = document.querySelector('.restart-btn');
+      restartBtn.addEventListener('click', function () {
+        controller.init();
+      });
     }
   }
 }
 
 view.createBoard();
+controller.init();
 app.start();

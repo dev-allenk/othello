@@ -15,6 +15,9 @@
         padding: 0;
       }
       .wrapper {
+        display: flex;
+        flex-flow: column;
+        align-items: center;
         width: 36rem;
         margin: 0 auto;
       }
@@ -34,11 +37,9 @@
       }
       .black {
         background-color: black;
-        background-size: cover;
       }
       .white {
         background-color: white;
-        background-size: cover;
       }
     </style>
   </head>
@@ -46,6 +47,8 @@
     <div class="wrapper">
       <h1>My Othello</h1>
       <table class="board"></table>
+      <div class="status">status</div>
+      <button class="restart-btn">Restart</button>
     </div>
     <script src="./app.js"></script>
   </body>
