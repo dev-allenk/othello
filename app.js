@@ -274,11 +274,11 @@ const app = {
           model.changeTurn();
         }
       })
-      const restartBtn = document.querySelector('.restart-btn');
-      restartBtn.addEventListener('click', function () {
-        controller.init();
-      });
     }
+    const restartBtn = document.querySelector('.restart-btn');
+    restartBtn.addEventListener('click', function () {
+      controller.init();
+    });
   }
 }
 
