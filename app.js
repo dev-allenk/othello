@@ -43,6 +43,15 @@ class View {
       board.appendChild(tr);
     }
   }
+
+  displayStone(event, turn) {
+    event.target.style.backgroundColor = turn;
+    // event.target.style.opacity = '0.5'
+  }
+  undisplayStone(event) {
+    event.target.style.backgroundColor = '';
+    event.target.style.opacity = '1'
+  }
 }
 
 class Model {
@@ -54,7 +63,6 @@ class Model {
     this.whiteStone = whiteStone;
   }
   init() {
-    console.log('init!')
     this.state = Array(8).fill(null).map(() => Array(8).fill(0));
     this.state[3][4] = this.blackStone;
     this.state[4][3] = this.blackStone;
@@ -69,6 +77,25 @@ class Model {
   setStone(state, turn, row, column) {
     if (turn === 'black') state[row][column] = this.blackStone;
     else state[row][column] = this.whiteStone;
+  }
+
+  //특정 좌표(row, column)에 돌을 놓고 뒤집을 수 있는지 8방향 탐색
+  //유효하면 뒤집은 결과를 리턴
+  update(state, direction, turn, row, column) {
+    const increments = {
+      n: [-1, 0],
+      ne: [-1, 1],
+      e: [0, 1],
+      se: [1, 1],
+      s: [1, 0],
+      sw: [1, -1],
+      w: [0, -1],
+      nw: [-1, -1]
+    }
+    const [rowIncrement, columnIncrement] = increments[direction];
+    const stateCopy = state.map(el => [...el]);
+    const value = stateCopy[row + rowIncrement][column + columnIncrement];
+
   }
 
   getDescendDiagonal({ state, row, column }) {
@@ -241,6 +268,12 @@ class Controller {
     const [row, column] = input.split('').map(el => Number(el));
     return { row, column };
   }
+  displayStone(event) {
+    this.view.displayStone(event, this.model.turn);
+  }
+  undisplayStone(event) {
+    this.view.undisplayStone(event);
+  }
 }
 
 const blackStone = 1;
@@ -279,6 +312,13 @@ const app = {
     restartBtn.addEventListener('click', function () {
       controller.init();
     });
+
+    td.forEach(el => el.addEventListener('mouseenter', function (e) {
+      controller.displayStone(e);
+    }))
+    td.forEach(el => el.addEventListener('mouseleave', function (e) {
+      controller.undisplayStone(e);
+    }))
   }
 }
 
