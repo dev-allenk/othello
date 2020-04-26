@@ -1,3 +1,3 @@
 # othello
 
-https://revlanc.github.io/othello/index.html
+https://dev-allenk.github.io/othello/index.html
